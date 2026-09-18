@@ -11,6 +11,51 @@
 
 Welcome to your Remotion project!
 
+## Video 4 — Saadiyat Island
+
+An 80-second (2400 frame) 1080×1920 map-led reel, built line by line from the
+script. Render it with:
+
+```console
+npx remotion render SaadiyatReel out/saadiyat-reel.mp4
+```
+
+Or open it in the Studio with `npm run dev`.
+
+### Where things live
+
+| File | What it controls |
+| --- | --- |
+| `src/reel/timeline.ts` | **The single source of truth.** Every line of the script with its duration and the one visual action it triggers, plus the whole camera track. Re-time a line here and the camera, graphics and inserts all follow. |
+| `src/reel/geo.ts` | Real `[lng, lat]` geography — island outlines, districts, museum pins, the Marsa footprint. Plain arrays, so real GeoJSON drops straight in. |
+| `src/reel/dialogue.ts` | The dialogue edit. One in/out point per line of the raw take; the reel assembles them at the timeline's beat timings. |
+| `src/reel/assets.ts` | Filenames for the presenter footage and the twelve image slots. |
+| `src/reel/sound.ts` | The three-level cue list. Seven level-3 story beats, and no cue on every text entrance. |
+| `src/reel/theme.ts` | Colours, type scale, easings, layout zones. One visual system. |
+| `public/README.md` | How to drop your footage and imagery in. |
+
+### How the map works
+
+There are no map tiles. The map is drawn from the coordinates in `geo.ts` and
+projected live against a camera of `{lng, lat, widthKm, bearing}`, so the camera
+can fly through it and every marker, boundary and image insert is positioned by
+real geography rather than by hand.
+
+The map is rotated about 50° (`bearing`). Saadiyat runs WSW–ENE, so with north
+up it lands in a 9:16 frame as a thin strip with dead space above and below;
+rotated, it runs corner to corner and fills the frame. A compass rose keeps the
+viewer oriented.
+
+One camera track covers all 2400 frames and is always interpolating between two
+keyframes, plus a permanent sub-perceptual drift — so the map is never frozen.
+
+### Before publishing
+
+The geography in `geo.ts` is hand-authored and approximate. Replace the
+**Marsa Al Saadiyat boundary** (currently a placeholder positioned north per the
+script) and the **Cultural District boundary** with the official outlines, and
+spot-check the five museum pins.
+
 ## Commands
 
 **Install Dependencies**
