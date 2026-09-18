@@ -4,6 +4,7 @@ import { COLOR, EASE, CANVAS } from "../theme";
 import type { AssetSlot } from "../assets";
 import { useMap } from "./MapStage";
 import type { LngLat } from "../geo";
+import { useIsTextOnly } from "../renderMode";
 
 /**
  * External imagery, attached to the map.
@@ -29,6 +30,7 @@ export const AssetInsert: React.FC<{
   const frame = useCurrentFrame();
   const { project } = useMap();
   const [ax, ay] = project(at);
+  const textOnly = useIsTextOnly();
 
   const enter = 13;
   const exit = 11;
@@ -45,7 +47,8 @@ export const AssetInsert: React.FC<{
   });
   const live = open * (1 - close);
 
-  if (live <= 0.001) {
+  // Image cards are picture, not typography - they have no place on a text layer.
+  if (live <= 0.001 || textOnly) {
     return null;
   }
 

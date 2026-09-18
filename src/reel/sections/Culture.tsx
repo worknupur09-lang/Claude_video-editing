@@ -8,6 +8,7 @@ import { MapRing, inOut, ramp, useMap } from "../components/MapStage";
 import { Marker } from "../components/Marker";
 import { AssetInsert } from "../components/AssetInsert";
 import { CANVAS } from "../theme";
+import { useIsTextOnly } from "../renderMode";
 
 /**
  * CULTURAL DISTRICT — 585-1035.
@@ -38,6 +39,7 @@ const ORDER = [
 export const Culture: React.FC = () => {
   const frame = useCurrentFrame();
   const { line } = useMap();
+  const textOnly = useIsTextOnly();
 
   const district = beat("cultural-district");
   const payoff = beat("five-museums");
@@ -67,7 +69,13 @@ export const Culture: React.FC = () => {
           fontFamily: "Inter",
           ...TYPE.kicker,
           color: COLOR.gold,
-          opacity: inOut(frame, district.start + 4, 14, district.frames + 10, 18),
+          opacity: inOut(
+            frame,
+            district.start + 4,
+            14,
+            district.frames + 10,
+            18,
+          ),
           pointerEvents: "none",
         }}
       >
@@ -97,10 +105,15 @@ export const Culture: React.FC = () => {
                         extrapolateRight: "clamp",
                       }) +
                         // All five come back up together for the payoff.
-                        interpolate(frame, [payoff.start - 16, payoff.start], [0, 0.5], {
-                          extrapolateLeft: "clamp",
-                          extrapolateRight: "clamp",
-                        }),
+                        interpolate(
+                          frame,
+                          [payoff.start - 16, payoff.start],
+                          [0, 0.5],
+                          {
+                            extrapolateLeft: "clamp",
+                            extrapolateRight: "clamp",
+                          },
+                        ),
                     )) * detail
               }
             />
@@ -118,23 +131,29 @@ export const Culture: React.FC = () => {
       })}
 
       {/* "Five museums, one beach." Back to the map. No collage. */}
-      <svg
-        width={CANVAS.width}
-        height={CANVAS.height}
-        viewBox={`0 0 ${CANVAS.width} ${CANVAS.height}`}
-        style={{ position: "absolute", inset: 0, pointerEvents: "none" }}
-      >
-        <path
-          d={line(SAADIYAT_BEACH)}
-          fill="none"
-          stroke={COLOR.goldBright}
-          strokeWidth={4}
-          strokeLinecap="round"
-          strokeDasharray={4000}
-          strokeDashoffset={4000 * (1 - ramp(frame, payoff.start - 18, 40))}
-          opacity={inOut(frame, payoff.start - 18, 14, payoff.frames + 26, 20) * 0.9 * detail}
-        />
-      </svg>
+      {textOnly ? null : (
+        <svg
+          width={CANVAS.width}
+          height={CANVAS.height}
+          viewBox={`0 0 ${CANVAS.width} ${CANVAS.height}`}
+          style={{ position: "absolute", inset: 0, pointerEvents: "none" }}
+        >
+          <path
+            d={line(SAADIYAT_BEACH)}
+            fill="none"
+            stroke={COLOR.goldBright}
+            strokeWidth={4}
+            strokeLinecap="round"
+            strokeDasharray={4000}
+            strokeDashoffset={4000 * (1 - ramp(frame, payoff.start - 18, 40))}
+            opacity={
+              inOut(frame, payoff.start - 18, 14, payoff.frames + 26, 20) *
+              0.9 *
+              detail
+            }
+          />
+        </svg>
+      )}
 
       <div
         style={{
@@ -158,7 +177,11 @@ export const Culture: React.FC = () => {
               frame,
               [payoff.start - 6, payoff.start + 10],
               [14, 0],
-              { extrapolateLeft: "clamp", extrapolateRight: "clamp", easing: EASE.out },
+              {
+                extrapolateLeft: "clamp",
+                extrapolateRight: "clamp",
+                easing: EASE.out,
+              },
             )}px`,
           }}
         >

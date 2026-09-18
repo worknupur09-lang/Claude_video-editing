@@ -4,6 +4,7 @@ import { COLOR, EASE, TYPE } from "../theme";
 import { CANVAS } from "../theme";
 import { useMap } from "./MapStage";
 import type { LngLat } from "../geo";
+import { useIsTextOnly } from "../renderMode";
 
 /**
  * A location marker: dot, one expanding bloom ring, label.
@@ -43,10 +44,15 @@ export const Marker: React.FC<{
 }) => {
   const { project, camera } = useMap();
   const [x, y] = project(at);
+  const textOnly = useIsTextOnly();
 
   if (progress <= 0) {
     return null;
   }
+
+  // On the text layer the label travels alone. A gold dot keyed over someone
+  // else's footage is a speck with nothing to anchor it to.
+  const showPin = !textOnly;
 
   const appear = interpolate(progress, [0, 1], [0, 1], { easing: EASE.out });
   // Single bloom, front-loaded, gone by the time the label has settled.
@@ -58,39 +64,51 @@ export const Marker: React.FC<{
   const onLeft = side === "auto" ? x > CANVAS.width * 0.58 : side === "left";
 
   return (
-    <div style={{ position: "absolute", left: x, top: y, pointerEvents: "none", opacity: resting }}>
+    <div
+      style={{
+        position: "absolute",
+        left: x,
+        top: y,
+        pointerEvents: "none",
+        opacity: resting,
+      }}
+    >
       {/* Bloom ring */}
-      <div
-        style={{
-          position: "absolute",
-          left: 0,
-          top: 0,
-          width: size * 2,
-          height: size * 2,
-          marginLeft: -size,
-          marginTop: -size,
-          borderRadius: "50%",
-          border: `1.5px solid ${color}`,
-          opacity: bloom * 0.6,
-          scale: 1 + bloom * 3.4,
-        }}
-      />
+      {showPin ? (
+        <div
+          style={{
+            position: "absolute",
+            left: 0,
+            top: 0,
+            width: size * 2,
+            height: size * 2,
+            marginLeft: -size,
+            marginTop: -size,
+            borderRadius: "50%",
+            border: `1.5px solid ${color}`,
+            opacity: bloom * 0.6,
+            scale: 1 + bloom * 3.4,
+          }}
+        />
+      ) : null}
       {/* Dot */}
-      <div
-        style={{
-          position: "absolute",
-          left: 0,
-          top: 0,
-          width: size,
-          height: size,
-          marginLeft: -size / 2,
-          marginTop: -size / 2,
-          borderRadius: "50%",
-          backgroundColor: color,
-          boxShadow: `0 0 ${12 * appear}px ${color}`,
-          scale: appear,
-        }}
-      />
+      {showPin ? (
+        <div
+          style={{
+            position: "absolute",
+            left: 0,
+            top: 0,
+            width: size,
+            height: size,
+            marginLeft: -size / 2,
+            marginTop: -size / 2,
+            borderRadius: "50%",
+            backgroundColor: color,
+            boxShadow: `0 0 ${12 * appear}px ${color}`,
+            scale: appear,
+          }}
+        />
+      ) : null}
 
       {label && camera.widthKm <= labelMaxKm ? (
         <div
@@ -149,8 +167,10 @@ export const AmenityMark: React.FC<{
 }> = ({ at, kind, progress }) => {
   const { project } = useMap();
   const [x, y] = project(at);
+  const textOnly = useIsTextOnly();
 
-  if (progress <= 0) {
+  // Map symbol, not type. The legend carries the words on the text layer.
+  if (progress <= 0 || textOnly) {
     return null;
   }
 

@@ -14,6 +14,7 @@ import { MapRing, inOut, ramp, useMap } from "../components/MapStage";
 import { AmenityMark } from "../components/Marker";
 import { AssetInsert } from "../components/AssetInsert";
 import { Statistic } from "../components/Statistic";
+import { useIsTextOnly } from "../renderMode";
 
 /**
  * MARSA AL SAADIYAT — 1035-1692.
@@ -30,6 +31,7 @@ import { Statistic } from "../components/Statistic";
 export const Marsa: React.FC = () => {
   const frame = useCurrentFrame();
   const { line } = useMap();
+  const textOnly = useIsTextOnly();
 
   const empty = beat("empty-stretch");
   const announced = beat("announced");
@@ -68,7 +70,9 @@ export const Marsa: React.FC = () => {
       />
 
       <MarsaTitle
-        opacity={inOut(frame, empty.start + 34, 16, billion.frames + 60, 22) * detail}
+        opacity={
+          inOut(frame, empty.start + 34, 16, billion.frames + 60, 22) * detail
+        }
       />
 
       {/* Masterplan parcels ghost in behind everything from "Announced in July". */}
@@ -92,7 +96,13 @@ export const Marsa: React.FC = () => {
           fontFamily: "Inter",
           ...TYPE.kicker,
           color: COLOR.plan,
-          opacity: inOut(frame, announced.start + 4, 12, announced.frames - 4, 14),
+          opacity: inOut(
+            frame,
+            announced.start + 4,
+            12,
+            announced.frames - 4,
+            14,
+          ),
           pointerEvents: "none",
         }}
       >
@@ -187,23 +197,37 @@ export const Marsa: React.FC = () => {
       />
 
       {/* "Two hotels, three schools, an Etihad Rail station." Map symbols only. */}
-      <svg
-        width={CANVAS.width}
-        height={CANVAS.height}
-        viewBox={`0 0 ${CANVAS.width} ${CANVAS.height}`}
-        style={{ position: "absolute", inset: 0, pointerEvents: "none" }}
-      >
-        <path
-          d={line(RAIL_LINE)}
-          fill="none"
-          stroke={COLOR.gold}
-          strokeWidth={2.4}
-          strokeDasharray={3000}
-          strokeDashoffset={3000 * (1 - ramp(frame, amenities.start + 40, 44))}
-          opacity={inOut(frame, amenities.start + 40, 14, amenities.frames + 30, 20) * 0.75 * detail}
-          strokeLinecap="round"
-        />
-      </svg>
+      {textOnly ? null : (
+        <svg
+          width={CANVAS.width}
+          height={CANVAS.height}
+          viewBox={`0 0 ${CANVAS.width} ${CANVAS.height}`}
+          style={{ position: "absolute", inset: 0, pointerEvents: "none" }}
+        >
+          <path
+            d={line(RAIL_LINE)}
+            fill="none"
+            stroke={COLOR.gold}
+            strokeWidth={2.4}
+            strokeDasharray={3000}
+            strokeDashoffset={
+              3000 * (1 - ramp(frame, amenities.start + 40, 44))
+            }
+            opacity={
+              inOut(
+                frame,
+                amenities.start + 40,
+                14,
+                amenities.frames + 30,
+                20,
+              ) *
+              0.75 *
+              detail
+            }
+            strokeLinecap="round"
+          />
+        </svg>
+      )}
 
       {MARSA_AMENITIES.map((a, i) => (
         <AmenityMark
@@ -219,7 +243,10 @@ export const Marsa: React.FC = () => {
       ))}
 
       <AmenityLegend
-        opacity={inOut(frame, amenities.start + 10, 16, amenities.frames - 16, 20) * detail}
+        opacity={
+          inOut(frame, amenities.start + 10, 16, amenities.frames - 16, 20) *
+          detail
+        }
       />
 
       {/* "First homes go on sale before the end of the year." */}
@@ -339,7 +366,9 @@ const AmenityLegend: React.FC<{ opacity: number }> = ({ opacity }) => {
   );
 };
 
-const LegendGlyph: React.FC<{ kind: "hotel" | "school" | "rail" }> = ({ kind }) => {
+const LegendGlyph: React.FC<{ kind: "hotel" | "school" | "rail" }> = ({
+  kind,
+}) => {
   const box: React.CSSProperties = {
     width: 22,
     height: 22,
@@ -379,7 +408,14 @@ const LegendGlyph: React.FC<{ kind: "hotel" | "school" | "rail" }> = ({ kind }) 
   }
   return (
     <div style={box}>
-      <div style={{ width: 22, height: 5, backgroundColor: COLOR.gold, borderRadius: 1 }} />
+      <div
+        style={{
+          width: 22,
+          height: 5,
+          backgroundColor: COLOR.gold,
+          borderRadius: 1,
+        }}
+      />
     </div>
   );
 };

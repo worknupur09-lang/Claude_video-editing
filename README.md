@@ -22,6 +22,38 @@ npx remotion render SaadiyatReel out/saadiyat-reel.mp4
 
 Or open it in the Studio with `npm run dev`.
 
+### Green-screen text layer
+
+`SaadiyatTextGreenScreen` is the same composition with the picture layers
+switched off — typography only, over `#00FF00`, for keying over other footage.
+
+```console
+npx remotion render SaadiyatTextGreenScreen out/saadiyat-text-greenscreen.mp4 \
+  --crf=14 --pixel-format=yuv420p --muted
+```
+
+It runs the same sections off the same timeline, so it lines up with the full
+render frame for frame. What it keeps and drops:
+
+| Kept | Dropped |
+| --- | --- |
+| Every figure, kicker and qualifier | The map, coastlines and boundaries |
+| Big type cards (`5 MUSEUMS`, `TROPHY ASSET`, `COMMENT SAADIYAT`) | Presenter window |
+| Place labels (`SAADIYAT`, `AL REEM`, `MARSA AL SAADIYAT`, museum names) | Image inserts |
+| Amenity legend, with its glyphs | Marker pins, amenity symbols, rail and coastline traces |
+| | Grain, vignette, grade, compass, audio |
+
+Shadows and glows are stripped in this mode — they exist to hold type legible
+against the map, and on green they would key out as dark fringing.
+
+Place labels are positioned by the map camera, so they drift as the camera
+moves. Over the original render that is correct; over unrelated footage the
+lower-third figures are the part that travels well.
+
+For cleaner edges than chroma keying can give, render with a real alpha channel
+instead — `--codec=prores --prores-profile=4444` — at the cost of a much larger
+file.
+
 ### Where things live
 
 | File | What it controls |

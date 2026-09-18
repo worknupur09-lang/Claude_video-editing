@@ -12,6 +12,7 @@ import {
 } from "../geo";
 import { CAMERA_TRACK } from "../timeline";
 import { cameraAt, makeProjector, type Projector } from "../projection";
+import { CHROMA_GREEN, useIsTextOnly } from "../renderMode";
 
 /**
  * The map layer. Present for all 2400 frames, always moving, never restarting.
@@ -56,8 +57,22 @@ export const MapStage: React.FC<{ children?: React.ReactNode }> = ({ children })
   const camera = cameraAt(frame, CAMERA_TRACK);
   const projector = makeProjector(camera);
   const { ring, line, project } = projector;
+  const textOnly = useIsTextOnly();
 
   const ctxOpacity = labelOpacity(camera.widthKm);
+
+  /**
+   * In text-only mode the camera still runs and the projector is still handed
+   * down, so map-anchored labels sit exactly where they do in the full render -
+   * only the drawn map itself is switched off.
+   */
+  if (textOnly) {
+    return (
+      <MapContext.Provider value={projector}>
+        <AbsoluteFill style={{ backgroundColor: CHROMA_GREEN }}>{children}</AbsoluteFill>
+      </MapContext.Provider>
+    );
+  }
 
   return (
     <MapContext.Provider value={projector}>
@@ -224,12 +239,13 @@ export const MapRing: React.FC<{
   fade = 1,
 }) => {
   const { ring: toPath } = useMap();
+  const textOnly = useIsTextOnly();
   const d = toPath(r);
 
   // Generous length estimate; the dash offset only needs to outrun the path.
   const LEN = 6000;
 
-  if (fade <= 0 || progress <= 0) {
+  if (fade <= 0 || progress <= 0 || textOnly) {
     return null;
   }
 
